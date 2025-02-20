@@ -1,0 +1,61 @@
+2025-02-20 08:10:11 - [✅ INFO] - Loading data from ..\resources\data\raw\BrentOilPrices.csv
+2025-02-20 08:10:11 - [✅ INFO] - Successfully loaded data from ..\resources\data\raw\BrentOilPrices.csv
+2025-02-20 08:10:11 - [✅ INFO] - 
+--- Data Summary ---
+2025-02-20 08:10:11 - [✅ INFO] -         count  unique        top freq       mean       std  min    25%    50%  \
+Date     9011    9011  20-May-87    1        NaN       NaN  NaN    NaN    NaN   
+Price  9011.0    5015        NaN  NaN  48.420782  32.86011  9.1  19.05  38.57   
+
+         75%     max    dtype  
+Date     NaN     NaN   object  
+Price  70.09  143.95  float64  
+2025-02-20 08:10:11 - [✅ INFO] - 
+--- Data Info ---
+2025-02-20 08:10:11 - [✅ INFO] - <class 'pandas.core.frame.DataFrame'>
+RangeIndex: 9011 entries, 0 to 9010
+Data columns (total 2 columns):
+ #   Column  Non-Null Count  Dtype  
+---  ------  --------------  -----  
+ 0   Date    9011 non-null   object 
+ 1   Price   9011 non-null   float64
+dtypes: float64(1), object(1)
+memory usage: 140.9+ KB
+
+2025-02-20 08:10:11 - [✅ INFO] - 
+--- Missing Values Analysis ---
+2025-02-20 08:10:11 - [✅ INFO] - No missing values found in the dataset.
+2025-02-20 08:10:11 - [✅ INFO] - 
+--- Total columns with Missing Values ---
+2025-02-20 08:10:11 - [✅ INFO] - 0
+2025-02-20 08:10:11 - [✅ INFO] - 
+--- Duplication Analysis ---
+2025-02-20 08:10:11 - [✅ INFO] - No duplicate rows found.
+2025-02-20 08:10:11 - [✅ INFO] - 
+--- Data Skewness ---
+2025-02-20 08:10:11 - [✅ INFO] - Price    0.765305
+dtype: float64
+2025-02-20 08:10:11 - [✅ INFO] - 
+--- Data Kurtosis ---
+2025-02-20 08:10:11 - [✅ INFO] - Price   -0.61044
+dtype: float64
+2025-02-20 08:10:11 - [✅ INFO] - 
+--- Correlation Matrix ---
+2025-02-20 08:10:11 - [✅ INFO] -        Price
+Price    1.0
+2025-02-20 08:10:11 - [✅ INFO] - 
+--- Data Head ---
+2025-02-20 08:10:11 - [✅ INFO] -         Date  Price
+0  20-May-87  18.63
+1  21-May-87  18.45
+2  22-May-87  18.55
+3  25-May-87  18.60
+4  26-May-87  18.63
+2025-02-20 08:10:11 - [✅ INFO] - 
+--- Data Tail ---
+2025-02-20 08:10:11 - [✅ INFO] -               Date  Price
+9006  Nov 08, 2022  96.85
+9007  Nov 09, 2022  93.05
+9008  Nov 10, 2022  94.25
+9009  Nov 11, 2022  96.37
+9010  Nov 14, 2022  93.59
+2025-02-20 08:10:11 - [✅ INFO] - Data summary and analysis completed successfully.
