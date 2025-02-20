@@ -79,6 +79,23 @@ class BrentOilDataPreprocessor:
             upper_bound = q3 + 1.5 * iqr
             self.data = self.data[(self.data['Price'] >= lower_bound) & (self.data['Price'] <= upper_bound)]
         return self
+    
+    def feature_engineering(self):
+        """Adds useful features like rolling averages."""
+        self.data["7_day_MA"] = self.data["Price"].rolling(window=7, min_periods=1).mean()
+        self.data["30_day_MA"] = self.data["Price"].rolling(window=30, min_periods=1).mean()
+        self.data["Volatility"] = self.data["Price"].pct_change().rolling(window=30, min_periods=1).std()
+        self.data.dropna(inplace=True)  # Remove NaNs from rolling calculations
+        return self
+
+    def add_time_features(self):
+        """Generate additional time-based features for analysis."""
+        self.data['year'] = self.data['Date'].dt.year
+        self.data['month'] = self.data['Date'].dt.month
+        self.data['day'] = self.data['Date'].dt.day
+        self.data['weekday'] = self.data['Date'].dt.weekday
+        self.data['quarter'] = self.data['Date'].dt.quarter
+        logger.info("Time-based features added.")
 
     def preprocess(self):
         """Execute the full preprocessing pipeline."""
@@ -87,5 +104,7 @@ class BrentOilDataPreprocessor:
         self.clean_data()
         self.handle_missing_values()
         self.remove_outliers()
+        self.add_time_features()
+        self.feature_engineering()
         logger.info(f"Preprocessing completed. Final shape: {self.data.shape}")
         return self.get_data()
