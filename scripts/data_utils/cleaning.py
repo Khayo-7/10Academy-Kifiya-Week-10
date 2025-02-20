@@ -1,6 +1,7 @@
 import os, sys
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from datetime import datetime
 
 # Setup logger for cleaning
@@ -17,13 +18,13 @@ class BrentOilDataPreprocessor:
 
     def load_data(self):
         """Load the Brent oil price dataset."""
-        self.data = pd.read_csv(self.file_path)
+        self.data = pd.read_csv(self.file_path) #, parse_dates=["Date"], dayfirst=True)
         logger.info(f"Data loaded successfully. Shape: {self.data.shape}")
         return self
     
     def save_data(self, output_path):
         """Saves the cleaned and processed dataset."""
-        self.data.to_csv(output_path, index=False)
+        self.data.to_csv(Path(output_path), index=False)
     
     def get_data(self):
         """Returns the processed dataframe."""
@@ -42,10 +43,10 @@ class BrentOilDataPreprocessor:
         
         if 'Date' in self.data.columns:
             try:
-                self.data["Date"] = pd.to_datetime(self.data["Date"], errors='coerce', dayfirst=True)
-                # self.data["Date"] = pd.to_datetime(self.data["Date"], errors='coerce', format='%d/%m/%Y')
+                self.data["Date"] = pd.to_datetime(self.data["Date"], errors='coerce', dayfirst=True) # , format='%d/%m/%Y')
                 self.data.dropna(subset=["Date"], inplace=True)
                 self.data.sort_values(by="Date", inplace=True)
+                # self.data.set_index("Date", inplace=True)
             except Exception as e:
                 logger.error(f"Date parsing failed: {e}")
         else:
@@ -80,22 +81,27 @@ class BrentOilDataPreprocessor:
             self.data = self.data[(self.data['Price'] >= lower_bound) & (self.data['Price'] <= upper_bound)]
         return self
     
+    def generate_temporal_features(self):
+        """Generate additional time-based features for analysis."""
+
+        self.data['Year'] = self.data['Date'].dt.year
+        self.data['Month'] = self.data['Date'].dt.month
+        self.data['Day'] = self.data['Date'].dt.day
+        self.data['Weekday'] = self.data['Date'].dt.weekday
+        self.data['Quarter'] = self.data['Date'].dt.quarter
+        self.data['Is_Weekend'] = self.data['Weekday'].apply(lambda x: 1 if x > 4 else 0)
+        self.data['Year_Month'] = self.data['Date'].dt.to_period('M')
+
+        logger.info("Time-based features added.")
+        
     def feature_engineering(self):
         """Adds useful features like rolling averages."""
         self.data["7_day_MA"] = self.data["Price"].rolling(window=7, min_periods=1).mean()
         self.data["30_day_MA"] = self.data["Price"].rolling(window=30, min_periods=1).mean()
+        self.data['Rolling_STD'] = self.data['Price'].rolling(window=365).std()
         self.data["Volatility"] = self.data["Price"].pct_change().rolling(window=30, min_periods=1).std()
         self.data.dropna(inplace=True)  # Remove NaNs from rolling calculations
         return self
-
-    def add_time_features(self):
-        """Generate additional time-based features for analysis."""
-        self.data['year'] = self.data['Date'].dt.year
-        self.data['month'] = self.data['Date'].dt.month
-        self.data['day'] = self.data['Date'].dt.day
-        self.data['weekday'] = self.data['Date'].dt.weekday
-        self.data['quarter'] = self.data['Date'].dt.quarter
-        logger.info("Time-based features added.")
 
     def preprocess(self):
         """Execute the full preprocessing pipeline."""
@@ -104,7 +110,7 @@ class BrentOilDataPreprocessor:
         self.clean_data()
         self.handle_missing_values()
         self.remove_outliers()
-        self.add_time_features()
+        self.generate_temporal_features()
         self.feature_engineering()
         logger.info(f"Preprocessing completed. Final shape: {self.data.shape}")
         return self.get_data()

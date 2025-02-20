@@ -8,7 +8,7 @@ from typing import List, Dict, Union, Optional, Any
 sys.path.append(os.path.join(os.path.abspath(__file__), '..', '..', '..'))
 from scripts.utils.logger import setup_logger
 
-logger = setup_logger("data_loader")
+logger = setup_logger("loaders")
 
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, obj):
