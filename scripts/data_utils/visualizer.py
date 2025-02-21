@@ -5,13 +5,13 @@ import seaborn as sns
 from pathlib import Path
 import matplotlib.pyplot as plt
 
-# Setup logger for data_loader
+# Setup logger for visualizer
 sys.path.append(os.path.join(os.path.abspath(__file__), '..', '..', '..'))
 from scripts.utils.logger import setup_logger
 
-logger = setup_logger("eda")
+logger = setup_logger("visualizer")
 
-class BrentOilEDA:
+class BrentOilVisualizer:
     def __init__(self, data_path: str, plot_dir: str = None):
         """Initialize EDA with cleaned Brent oil dataset."""
         self.data_path = data_path
