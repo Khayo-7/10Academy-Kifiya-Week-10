@@ -18,7 +18,7 @@ class BrentOilDataPreprocessor:
 
     def load_data(self):
         """Load the Brent oil price dataset."""
-        self.data = pd.read_csv(self.file_path, parse_dates=["Date"], dayfirst=True)
+        self.data = pd.read_csv(self.file_path, parse_dates=["Date"], dayfirst=True) # index_col="Date")
         self.data.sort_values(by="Date", inplace=True)
         self.data.set_index("Date", inplace=True)
         logger.info(f"Data loaded successfully. Shape: {self.data.shape}")
