@@ -2,8 +2,10 @@ import warnings
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from arch import arch_model
+from arch.univariate import ConstantMean, StudentsT
+from arch.multivariate import DCC, BEKK
 from statsmodels.tsa.stattools import adfuller
+from sklearn.metrics import mean_squared_error
 from scripts.utils.logger import setup_logger
 
 warnings.filterwarnings("ignore")
@@ -44,10 +46,12 @@ class MGARCHModel:
         """Defines the MGARCH model based on the specified type."""
         if self.model_type == "DCC":
             logger.info("Building DCC-MGARCH model...")
-            self.model = arch_model(self.returns, vol="Garch", p=self.p, q=self.q, dist="t", model="DCC")
+            mean_model = ConstantMean(self.returns)
+            self.model = DCC(mean_model, p=self.p, q=self.q, dist=StudentsT())
         elif self.model_type == "BEKK":
             logger.info("Building BEKK-MGARCH model...")
-            self.model = arch_model(self.returns, vol="Garch", p=self.p, q=self.q, dist="t", model="BEKK")
+            mean_model = ConstantMean(self.returns)
+            self.model = BEKK(mean_model, p=self.p, q=self.q, dist=StudentsT())
         else:
             logger.error("Invalid model type. Choose 'DCC' or 'BEKK'.")
             raise ValueError("Invalid MGARCH model type.")
@@ -69,9 +73,8 @@ class MGARCHModel:
             raise ValueError("Run `train()` before forecasting.")
 
         logger.info(f"Forecasting {steps} steps ahead...")
-        forecasts = self.fitted_model.forecast(start=0, horizon=steps)
-        vol_forecast = forecasts.variance.dropna()
-        
+        forecasts = self.fitted_model.forecast(horizon=steps)
+        vol_forecast = forecasts.variance.iloc[-1]  # Extract the last forecasted variance
         return vol_forecast
 
     def evaluate(self):
@@ -99,11 +102,17 @@ class MGARCHModel:
         actual_volatility = test.var(axis=1)
 
         for i in range(len(test)):
-            model = arch_model(train, vol="Garch", p=self.p, q=self.q, dist="t", model=self.model_type)
+            # Rebuild the model for each window
+            if self.model_type == "DCC":
+                model = DCC(ConstantMean(train), p=self.p, q=self.q, dist=StudentsT())
+            elif self.model_type == "BEKK":
+                model = BEKK(ConstantMean(train), p=self.p, q=self.q, dist=StudentsT())
+
             fitted_model = model.fit(disp="off")
-            forecast = fitted_model.forecast(start=0, horizon=1).variance.iloc[-1]
+            forecast = fitted_model.forecast(horizon=1).variance.iloc[-1]
             backtest_predictions.append(forecast)
 
+            # Update the training set
             train = pd.concat([train, test.iloc[[i]]])
 
         predicted_volatility = pd.DataFrame(backtest_predictions, index=test.index, columns=["Predicted Volatility"])
