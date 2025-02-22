@@ -2,11 +2,10 @@ import warnings
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from arch.univariate import ConstantMean, StudentsT
-from arch.multivariate import DCC, BEKK
 from statsmodels.tsa.stattools import adfuller
 from sklearn.metrics import mean_squared_error
 from scripts.utils.logger import setup_logger
+import pyflux as pf
 
 warnings.filterwarnings("ignore")
 logger = setup_logger("MGARCH_Model")
@@ -46,12 +45,10 @@ class MGARCHModel:
         """Defines the MGARCH model based on the specified type."""
         if self.model_type == "DCC":
             logger.info("Building DCC-MGARCH model...")
-            mean_model = ConstantMean(self.returns)
-            self.model = DCC(mean_model, p=self.p, q=self.q, dist=StudentsT())
+            self.model = pf.DCCGARCH(self.returns, p=self.p, q=self.q)
         elif self.model_type == "BEKK":
             logger.info("Building BEKK-MGARCH model...")
-            mean_model = ConstantMean(self.returns)
-            self.model = BEKK(mean_model, p=self.p, q=self.q, dist=StudentsT())
+            self.model = pf.BEKKGARCH(self.returns, p=self.p, q=self.q)
         else:
             logger.error("Invalid model type. Choose 'DCC' or 'BEKK'.")
             raise ValueError("Invalid MGARCH model type.")
@@ -63,7 +60,7 @@ class MGARCHModel:
             raise ValueError("Run `build_model()` before training.")
 
         logger.info("Training MGARCH model...")
-        self.fitted_model = self.model.fit(disp="off")
+        self.fitted_model = self.model.fit()
         logger.info(f"Model training completed. AIC: {self.fitted_model.aic}, BIC: {self.fitted_model.bic}")
 
     def forecast(self, steps=30):
@@ -73,9 +70,8 @@ class MGARCHModel:
             raise ValueError("Run `train()` before forecasting.")
 
         logger.info(f"Forecasting {steps} steps ahead...")
-        forecasts = self.fitted_model.forecast(horizon=steps)
-        vol_forecast = forecasts.variance.iloc[-1]  # Extract the last forecasted variance
-        return vol_forecast
+        forecasts = self.fitted_model.predict(h=steps)
+        return forecasts
 
     def evaluate(self):
         """Evaluates the MGARCH model."""
@@ -83,7 +79,7 @@ class MGARCHModel:
             logger.error("Model not trained. Run `train()` first.")
             raise ValueError("Run `train()` before evaluation.")
 
-        log_likelihood = self.fitted_model.loglikelihood
+        log_likelihood = self.fitted_model.log_likelihood
         aic = self.fitted_model.aic
         bic = self.fitted_model.bic
 
@@ -104,13 +100,13 @@ class MGARCHModel:
         for i in range(len(test)):
             # Rebuild the model for each window
             if self.model_type == "DCC":
-                model = DCC(ConstantMean(train), p=self.p, q=self.q, dist=StudentsT())
+                model = pf.DCCGARCH(train, p=self.p, q=self.q)
             elif self.model_type == "BEKK":
-                model = BEKK(ConstantMean(train), p=self.p, q=self.q, dist=StudentsT())
+                model = pf.BEKKGARCH(train, p=self.p, q=self.q)
 
-            fitted_model = model.fit(disp="off")
-            forecast = fitted_model.forecast(horizon=1).variance.iloc[-1]
-            backtest_predictions.append(forecast)
+            fitted_model = model.fit()
+            forecast = fitted_model.predict(h=1)
+            backtest_predictions.append(forecast.iloc[0])
 
             # Update the training set
             train = pd.concat([train, test.iloc[[i]]])
