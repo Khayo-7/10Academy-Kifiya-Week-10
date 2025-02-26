@@ -162,3 +162,77 @@ class LSTMModel:
         plt.xlabel("Time")
         plt.ylabel("Value")
         plt.show()
+
+# import numpy as np
+# import pandas as pd
+# import matplotlib.pyplot as plt
+# from sklearn.preprocessing import MinMaxScaler
+# import tensorflow as tf
+# from tensorflow.keras.models import Sequential
+# from tensorflow.keras.layers import LSTM, Dense, Dropout
+
+# class LSTMModel:
+#     def __init__(self, data_path, date_col="Date", price_col="Price", seq_length=60):
+#         self.data_path = data_path
+#         self.date_col = date_col
+#         self.price_col = price_col
+#         self.seq_length = seq_length
+#         self.scaler = MinMaxScaler(feature_range=(0, 1))
+#         self.model = None
+
+#     def load_data(self):
+#         """Loads and normalizes Brent oil price data."""
+#         df = pd.read_csv(self.data_path, parse_dates=[self.date_col])
+#         df.set_index(self.date_col, inplace=True)
+#         df.dropna(inplace=True)
+
+#         # Normalize price
+#         df[self.price_col] = self.scaler.fit_transform(df[[self.price_col]])
+#         self.data = df
+#         return df
+
+#     def create_sequences(self):
+#         """Generates input sequences and corresponding labels for training."""
+#         data = self.data[self.price_col].values
+#         X, y = [], []
+#         for i in range(len(data) - self.seq_length):
+#             X.append(data[i:i + self.seq_length])
+#             y.append(data[i + self.seq_length])
+#         return np.array(X), np.array(y)
+
+#     def build_model(self):
+#         """Defines and compiles the LSTM model."""
+#         self.model = Sequential([
+#             LSTM(50, return_sequences=True, input_shape=(self.seq_length, 1)),
+#             Dropout(0.2),
+#             LSTM(50, return_sequences=False),
+#             Dropout(0.2),
+#             Dense(25),
+#             Dense(1)
+#         ])
+#         self.model.compile(optimizer="adam", loss="mean_squared_error")
+
+#     def train_model(self, X_train, y_train, epochs=50, batch_size=32):
+#         """Trains the LSTM model."""
+#         self.model.fit(X_train, y_train, epochs=epochs, batch_size=batch_size, verbose=1)
+
+#     def forecast(self, last_sequence, steps=30):
+#         """Generates forecasts based on the trained model."""
+#         predictions = []
+#         current_seq = last_sequence
+
+#         for _ in range(steps):
+#             pred = self.model.predict(current_seq.reshape(1, self.seq_length, 1))[0, 0]
+#             predictions.append(pred)
+#             current_seq = np.append(current_seq[1:], pred).reshape(self.seq_length, 1)
+
+#         return self.scaler.inverse_transform(np.array(predictions).reshape(-1, 1))
+    
+#     def plot_forecast(self, actual_prices, predictions):
+#         """Plots actual vs. predicted prices."""
+#         plt.figure(figsize=(12, 6))
+#         plt.plot(actual_prices, label="Actual Prices")
+#         plt.plot(predictions, label="LSTM Forecast", linestyle="dashed")
+#         plt.legend()
+#         plt.title("Brent Oil Price Prediction with LSTM")
+#         plt.show()

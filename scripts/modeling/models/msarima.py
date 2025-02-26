@@ -141,3 +141,72 @@ class MSARIMAModel:
         plt.ylabel("Value")
         plt.legend()
         plt.show()
+        
+# import pandas as pd
+# import numpy as np
+# import matplotlib.pyplot as plt
+# import seaborn as sns
+# from statsmodels.tsa.stattools import adfuller
+# from statsmodels.tsa.regime_switching.markov_regression import MarkovRegression
+
+# class MS_ARIMA:
+#     def __init__(self, data_path, date_col="Date", price_col="Price"):
+#         self.data_path = data_path
+#         self.date_col = date_col
+#         self.price_col = price_col
+#         self.data = None
+#         self.model = None
+#         self.results = None
+
+#     def load_data(self):
+#         """Loads and preprocesses Brent oil price data."""
+#         df = pd.read_csv(self.data_path, parse_dates=[self.date_col])
+#         df.set_index(self.date_col, inplace=True)
+#         df.dropna(inplace=True)
+        
+#         # Convert prices to log returns for stationarity
+#         df["Returns"] = np.log(df[self.price_col] / df[self.price_col].shift(1))
+#         self.data = df.dropna()
+#         return self.data
+
+#     def check_stationarity(self):
+#         """Performs Augmented Dickey-Fuller test on returns."""
+#         result = adfuller(self.data["Returns"])
+#         return {
+#             "ADF Statistic": result[0],
+#             "p-value": result[1],
+#             "Stationary": result[1] < 0.05
+#         }
+
+#     def fit_model(self, k_regimes=2):
+#         """Fits Markov-Switching ARIMA model with specified regimes."""
+#         self.model = MarkovRegression(self.data["Returns"], k_regimes=k_regimes, trend="c", switching_variance=True)
+#         self.results = self.model.fit()
+#         print(self.results.summary())
+
+#     def plot_regime_probabilities(self):
+#         """Plots probabilities of different market regimes over time."""
+#         plt.figure(figsize=(12, 6))
+#         for i in range(self.results.k_regimes):
+#             plt.plot(self.data.index, self.results.smoothed_marginal_probabilities[i], label=f"Regime {i+1}")
+#         plt.title("Markov Regime Probabilities")
+#         plt.legend()
+#         plt.show()
+
+#     def classify_regimes(self):
+#         """Identifies which regime dominates at each point in time."""
+#         self.data["Regime"] = self.results.smoothed_marginal_probabilities.argmax(axis=1)
+#         return self.data[["Returns", "Regime"]]
+
+#     def forecast(self, steps=30):
+#         """Forecasts future prices based on the Markov model."""
+#         forecast = self.results.predict(start=len(self.data), end=len(self.data) + steps - 1)
+        
+#         plt.figure(figsize=(12, 6))
+#         plt.plot(self.data.index[-100:], self.data["Returns"].iloc[-100:], label="Observed Returns")
+#         plt.plot(pd.date_range(start=self.data.index[-1], periods=steps, freq="D"), forecast, label="Forecast", linestyle="dashed")
+#         plt.title("Markov-Switching ARIMA Forecast")
+#         plt.legend()
+#         plt.show()
+        
+#         return forecast

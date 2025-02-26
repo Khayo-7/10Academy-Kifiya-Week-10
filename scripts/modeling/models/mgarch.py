@@ -137,3 +137,137 @@ class MGARCHModel:
         plt.xlabel("Time")
         plt.ylabel("Volatility")
         plt.show()
+
+
+# import numpy as np
+# import pandas as pd
+# from arch import arch_model
+# from mgarch.mgarch import DCCMGARCH
+# from sklearn.preprocessing import StandardScaler
+
+# class MGARCHModel:
+#     def __init__(self, data_path):
+#         self.data_path = data_path
+#         self.data = None
+#         self.model = None
+#         self.returns = None
+
+#     def load_data(self):
+#         """Loads Brent oil prices and economic indicators."""
+#         df = pd.read_csv(self.data_path, parse_dates=["Date"])
+#         df.set_index("Date", inplace=True)
+#         df.dropna(inplace=True)
+
+#         # Compute log returns for all series
+#         df_returns = df.pct_change().dropna()
+
+#         # Standardize returns for numerical stability
+#         scaler = StandardScaler()
+#         self.returns = pd.DataFrame(scaler.fit_transform(df_returns), index=df_returns.index, columns=df_returns.columns)
+
+#         self.data = df
+#         return self.returns
+
+#     def fit_model(self):
+#         """Fits a DCC-GARCH model."""
+#         self.model = DCCMGARCH(p=1, q=1)
+#         self.model.fit(self.returns)
+#         return self.model
+
+#     def forecast_volatility(self, steps=5):
+#         """Forecasts conditional volatility and correlations."""
+#         vol_forecast, corr_forecast = self.model.forecast(steps)
+#         return vol_forecast, corr_forecast
+
+# import numpy as np
+# import pandas as pd
+# from sklearn.metrics import mean_squared_error
+# from mgarch_model import MGARCHModel
+
+# class MGARCHBacktester:
+#     def __init__(self, data_path, train_ratio=0.8):
+#         self.data_path = data_path
+#         self.train_ratio = train_ratio
+#         self.mgarch_model = MGARCHModel(data_path)
+#         self.train_data = None
+#         self.test_data = None
+#         self.model = None
+
+#     def split_data(self):
+#         """Splits data into training and testing sets."""
+#         returns = self.mgarch_model.load_data()
+#         split_idx = int(len(returns) * self.train_ratio)
+#         self.train_data = returns.iloc[:split_idx]
+#         self.test_data = returns.iloc[split_idx:]
+#         return self.train_data, self.test_data
+
+#     def train_model(self):
+#         """Trains MGARCH model on training data."""
+#         self.mgarch_model.returns = self.train_data
+#         self.model = self.mgarch_model.fit_model()
+#         return self.model
+
+#     def evaluate_forecast(self):
+#         """Evaluates forecast accuracy on test data."""
+#         actual_volatility = self.test_data.std(axis=0).values
+#         vol_forecast, _ = self.mgarch_model.forecast_volatility(steps=len(self.test_data))
+
+#         # Compute RMSE and MSE for volatility predictions
+#         rmse = np.sqrt(mean_squared_error(actual_volatility, vol_forecast.mean(axis=0)))
+#         mse = mean_squared_error(actual_volatility, vol_forecast.mean(axis=0))
+
+#         return {"RMSE": rmse, "MSE": mse}
+
+# import itertools
+# import numpy as np
+# import pandas as pd
+# from arch import arch_model
+# from mgarch_model import MGARCHModel
+# from sklearn.metrics import mean_squared_error
+
+# class MGARCHTuner:
+#     def __init__(self, data_path, p_values, q_values, distributions):
+#         self.data_path = data_path
+#         self.p_values = p_values
+#         self.q_values = q_values
+#         self.distributions = distributions
+#         self.best_params = None
+#         self.best_score = float("inf")
+
+#     def tune_hyperparameters(self):
+#         """Grid search over (p, q) and distribution assumptions."""
+#         mgarch = MGARCHModel(self.data_path)
+#         returns = mgarch.load_data()
+
+#         # Split data
+#         train_size = int(len(returns) * 0.8)
+#         train_data = returns.iloc[:train_size]
+#         test_data = returns.iloc[train_size:]
+
+#         # Iterate over all combinations of p, q, and distributions
+#         for p, q, dist in itertools.product(self.p_values, self.q_values, self.distributions):
+#             try:
+#                 # Fit model
+#                 mgarch.returns = train_data
+#                 model = mgarch.fit_model(p=p, q=q, dist=dist)
+
+#                 # Forecast test set volatility
+#                 vol_forecast, _ = mgarch.forecast_volatility(steps=len(test_data))
+
+#                 # Compute RMSE
+#                 actual_volatility = test_data.std(axis=0).values
+#                 rmse = np.sqrt(mean_squared_error(actual_volatility, vol_forecast.mean(axis=0)))
+
+#                 # Update best parameters
+#                 if rmse < self.best_score:
+#                     self.best_score = rmse
+#                     self.best_params = (p, q, dist)
+                
+#                 print(f"Tried (p={p}, q={q}, dist={dist}) -> RMSE: {rmse:.4f}")
+
+#             except Exception as e:
+#                 print(f"Failed for (p={p}, q={q}, dist={dist}): {e}")
+
+#         print(f"Best Model: p={self.best_params[0]}, q={self.best_params[1]}, dist={self.best_params[2]}, RMSE={self.best_score:.4f}")
+#         return self.best_params
+

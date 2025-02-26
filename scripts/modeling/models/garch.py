@@ -127,3 +127,178 @@ class GARCHModel:
         plt.ylabel("Volatility")
         plt.legend()
         plt.show()
+
+# import numpy as np
+# import pandas as pd
+# import matplotlib.pyplot as plt
+# import seaborn as sns
+# from arch import arch_model
+# from statsmodels.tsa.stattools import adfuller
+
+# class GARCHModel:
+#     def __init__(self, data_path: str, date_col: str = "Date", price_col: str = "Price"):
+#         self.data_path = data_path
+#         self.date_col = date_col
+#         self.price_col = price_col
+#         self.data = None
+#         self.model = None
+
+#     def load_data(self):
+#         """Loads and preprocesses data."""
+#         df = pd.read_csv(self.data_path, parse_dates=[self.date_col])
+#         df.set_index(self.date_col, inplace=True)
+#         df = df[[self.price_col]].dropna()
+        
+#         # Convert to returns (log differences)
+#         df["returns"] = np.log(df[self.price_col] / df[self.price_col].shift(1))
+#         df.dropna(inplace=True)
+        
+#         self.data = df
+#         return df
+
+#     def check_stationarity(self):
+#         """Performs ADF test and returns p-value."""
+#         result = adfuller(self.data["returns"])
+#         print(f"ADF Statistic: {result[0]}")
+#         print(f"p-value: {result[1]}")
+#         return result[1] < 0.05  # If p < 0.05, data is stationary
+
+#     def plot_volatility(self):
+#         """Plots returns to check for volatility clustering."""
+#         plt.figure(figsize=(12, 5))
+#         plt.plot(self.data["returns"], label="Returns", color="blue")
+#         plt.title("Brent Oil Returns with Volatility Clustering")
+#         plt.legend()
+#         plt.show()
+
+#     def fit_garch(self, p=1, q=1):
+#         """Fits a GARCH model with given parameters."""
+#         model = arch_model(self.data["returns"], vol="Garch", p=p, q=q)
+#         self.model = model.fit(disp="off")
+#         print(self.model.summary())
+
+#     def plot_conditional_volatility(self):
+#         """Plots the estimated volatility."""
+#         self.data["Volatility"] = self.model.conditional_volatility
+#         plt.figure(figsize=(12, 5))
+#         plt.plot(self.data["Volatility"], label="Estimated Volatility", color="red")
+#         plt.title("GARCH Estimated Volatility")
+#         plt.legend()
+#         plt.show()
+
+#     def forecast_volatility(self, steps=30):
+#         """Forecasts future volatility."""
+#         forecast = self.model.forecast(horizon=steps)
+#         forecast_vol = forecast.variance[-1, :]
+        
+#         plt.figure(figsize=(10, 5))
+#         plt.plot(forecast_vol, label="Forecasted Volatility", color="green")
+#         plt.title("GARCH Forecasted Volatility")
+#         plt.legend()
+#         plt.show()
+        
+#         return forecast_vol
+
+# import numpy as np
+# import pandas as pd
+# import matplotlib.pyplot as plt
+# from arch import arch_model
+
+# class GARCHModel:
+#     def __init__(self, data_path, date_col="Date", price_col="Price"):
+#         self.data_path = data_path
+#         self.date_col = date_col
+#         self.price_col = price_col
+#         self.model = None
+#         self.fitted_model = None
+
+#     def load_data(self):
+#         """Loads Brent oil price data and computes log returns."""
+#         df = pd.read_csv(self.data_path, parse_dates=[self.date_col])
+#         df.set_index(self.date_col, inplace=True)
+#         df.dropna(inplace=True)
+
+#         # Compute log returns
+#         df["log_return"] = np.log(df[self.price_col] / df[self.price_col].shift(1))
+#         df.dropna(inplace=True)
+#         self.data = df
+#         return df
+
+#     def fit_model(self, p=1, q=1):
+#         """Fits a GARCH(p, q) model to log returns."""
+#         returns = self.data["log_return"] * 100  # Scale returns for stability
+#         self.model = arch_model(returns, vol="Garch", p=p, q=q, mean="Zero", dist="Normal")
+#         self.fitted_model = self.model.fit(disp="off")  # Disable verbose output
+#         return self.fitted_model.summary()
+
+#     def forecast_volatility(self, days=30):
+#         """Generates volatility forecasts for the specified horizon."""
+#         if self.fitted_model is None:
+#             raise ValueError("Model is not trained. Call fit_model() first.")
+
+#         forecasts = self.fitted_model.forecast(horizon=days)
+#         return forecasts.variance[-1:].T  # Return variance predictions
+
+#     def plot_volatility(self):
+#         """Plots actual vs. predicted volatility."""
+#         plt.figure(figsize=(12, 6))
+#         plt.plot(self.data.index[-500:], self.fitted_model.conditional_volatility[-500:], label="GARCH Volatility")
+#         plt.title("Brent Oil Price Volatility (GARCH Model)")
+#         plt.xlabel("Date")
+#         plt.ylabel("Volatility")
+#         plt.legend()
+#         plt.show()
+
+# import numpy as np
+# import pandas as pd
+# from arch import arch_model
+# from sklearn.metrics import mean_squared_error
+
+# class GARCHBacktester:
+#     def __init__(self, data_path, window_size=500, p=1, q=1):
+#         self.data_path = data_path
+#         self.window_size = window_size
+#         self.p = p
+#         self.q = q
+#         self.data = None
+#         self.predictions = []
+#         self.actual_volatility = []
+
+#     def load_data(self):
+#         """Loads Brent oil price data and computes log returns."""
+#         df = pd.read_csv(self.data_path, parse_dates=["Date"])
+#         df.set_index("Date", inplace=True)
+#         df.dropna(inplace=True)
+
+#         # Compute log returns
+#         df["log_return"] = np.log(df["Price"] / df["Price"].shift(1))
+#         df.dropna(inplace=True)
+#         self.data = df
+#         return df
+
+#     def backtest(self):
+#         """Performs rolling window backtesting of the GARCH model."""
+#         log_returns = self.data["log_return"] * 100  # Scale for stability
+#         total_points = len(log_returns)
+
+#         for start in range(total_points - self.window_size):
+#             train = log_returns[start : start + self.window_size]
+
+#             # Fit GARCH model
+#             model = arch_model(train, vol="Garch", p=self.p, q=self.q, mean="Zero", dist="Normal")
+#             fitted_model = model.fit(disp="off")
+
+#             # Predict next-day volatility
+#             forecast = fitted_model.forecast(start=len(train), horizon=1)
+#             predicted_vol = np.sqrt(forecast.variance.iloc[-1, 0])  # Convert variance to volatility
+#             actual_vol = np.abs(log_returns.iloc[start + self.window_size])
+
+#             # Store results
+#             self.predictions.append(predicted_vol)
+#             self.actual_volatility.append(actual_vol)
+
+#         return self.predictions, self.actual_volatility
+
+#     def evaluate(self):
+#         """Calculates RMSE to measure prediction accuracy."""
+#         return np.sqrt(mean_squared_error(self.actual_volatility, self.predictions))

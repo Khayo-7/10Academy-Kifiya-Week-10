@@ -109,3 +109,93 @@ class ARIMAModel:
         plt.ylabel("Price")
         plt.legend()
         plt.show()
+
+# import numpy as np
+# import pandas as pd
+# import statsmodels.api as sm
+# import matplotlib.pyplot as plt
+# import seaborn as sns
+# from statsmodels.tsa.stattools import adfuller
+# from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+# from pmdarima import auto_arima
+# from sklearn.metrics import mean_absolute_error, mean_squared_error
+
+# class ARIMAModel:
+#     def __init__(self, data_path: str, date_col: str = "Date", price_col: str = "Price"):
+#         self.data_path = data_path
+#         self.date_col = date_col
+#         self.price_col = price_col
+#         self.data = None
+#         self.model = None
+
+#     def load_data(self):
+#         """Loads and preprocesses data."""
+#         df = pd.read_csv(self.data_path, parse_dates=[self.date_col])
+#         df.set_index(self.date_col, inplace=True)
+#         df = df[[self.price_col]].dropna()
+#         self.data = df
+#         return df
+
+#     def check_stationarity(self):
+#         """Performs ADF test and returns p-value."""
+#         result = adfuller(self.data[self.price_col])
+#         print(f"ADF Statistic: {result[0]}")
+#         print(f"p-value: {result[1]}")
+#         return result[1] < 0.05  # If p < 0.05, data is stationary
+
+#     def difference_data(self):
+#         """Applies differencing if data is non-stationary."""
+#         self.data["diff_price"] = self.data[self.price_col].diff().dropna()
+#         return self.data.dropna()
+
+#     def plot_acf_pacf(self):
+#         """Plots ACF and PACF to determine ARIMA parameters."""
+#         fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+#         plot_acf(self.data[self.price_col].dropna(), ax=axes[0])
+#         plot_pacf(self.data[self.price_col].dropna(), ax=axes[1])
+#         plt.show()
+
+#     def optimize_arima(self):
+#         """Uses Auto-ARIMA to find optimal parameters."""
+#         model = auto_arima(self.data[self.price_col], seasonal=False, trace=True)
+#         print(f"Optimal ARIMA order: {model.order}")
+#         return model.order
+
+#     def train_model(self, order):
+#         """Trains the ARIMA model."""
+#         self.model = sm.tsa.ARIMA(self.data[self.price_col], order=order)
+#         self.model = self.model.fit()
+#         print(self.model.summary())
+
+#     def evaluate_model(self):
+#         """Evaluates ARIMA model on test data."""
+#         train_size = int(len(self.data) * 0.8)
+#         train, test = self.data.iloc[:train_size], self.data.iloc[train_size:]
+
+#         model = sm.tsa.ARIMA(train[self.price_col], order=self.model.model.order)
+#         model_fit = model.fit()
+
+#         predictions = model_fit.forecast(steps=len(test))
+#         test["Predictions"] = predictions
+
+#         mae = mean_absolute_error(test[self.price_col], test["Predictions"])
+#         rmse = np.sqrt(mean_squared_error(test[self.price_col], test["Predictions"]))
+
+#         print(f"MAE: {mae:.2f}, RMSE: {rmse:.2f}")
+
+#         plt.figure(figsize=(12, 5))
+#         plt.plot(train[self.price_col], label="Train")
+#         plt.plot(test[self.price_col], label="Test", color="blue")
+#         plt.plot(test["Predictions"], label="Predictions", color="red")
+#         plt.legend()
+#         plt.show()
+
+#     def forecast(self, steps=30):
+#         """Generates future price predictions."""
+#         forecast = self.model.forecast(steps=steps)
+#         plt.figure(figsize=(10, 5))
+#         plt.plot(self.data[self.price_col], label="Historical Data")
+#         plt.plot(pd.date_range(self.data.index[-1], periods=steps, freq="D"), forecast, label="Forecast", color="red")
+#         plt.legend()
+#         plt.show()
+#         return forecast

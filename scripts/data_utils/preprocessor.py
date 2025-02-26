@@ -128,3 +128,81 @@ class BrentOilDataPreprocessor:
         self.feature_engineering()
         logger.info(f"Preprocessing completed. Final shape: {self.data.shape}")
         return self.get_data()
+
+# import pandas as pd
+# import numpy as np
+# import matplotlib.pyplot as plt
+# import ruptures as rpt
+# import pymc3 as pm
+
+# data['Date'] = pd.to_datetime(data['Date'])
+# data = data.sort_values(by='Date')
+# data = data.set_index('Date')
+
+# # Preprocess the data
+# data['Price'] = data['Price'].interpolate()
+# # Plot the data
+# plt.figure(figsize=(14, 7))
+# plt.plot(data.index, data['Price'], label='Brent Oil Price')
+# plt.xlabel('Date')
+# plt.ylabel('Price (USD)')
+# plt.title('Brent Oil Prices Over Time')
+# plt.legend()
+# plt.show()
+
+# # CUSUM method
+# mean_price = data['Price'].mean()
+# cusum = np.cumsum(data['Price'] - mean_price)
+# plt.figure(figsize=(14, 7))
+# plt.plot(data.index, cusum, label='CUSUM')
+# plt.axhline(y=0, color='r', linestyle='--')
+# plt.xlabel('Date')
+# plt.ylabel('CUSUM Value')
+# plt.title('CUSUM Analysis')
+# plt.legend()
+# plt.show()
+
+# # Bayesian Change Point Detection using PyMC3
+# with pm.Model() as model:
+#     # Priors
+#     mean_prior = pm.Normal('mean_prior', mu=mean_price, sigma=10)
+#     change_point = pm.DiscreteUniform('change_point', lower=0, upper=len(data)-1)
+
+#     # Likelihood
+#     likelihood = pm.Normal('likelihood', mu=mean_prior, sigma=10, observed=data['Price'])
+
+#     # Inference
+#     trace = pm.sample(1000, tune=1000, cores=2)
+
+# # Plot results
+# pm.plot_posterior(trace)
+# plt.show()
+
+
+# change_point_index = 4753
+
+# # Plot the data with the change point
+# plt.figure(figsize=(14, 7))
+# plt.plot(data.index, data['Price'], label='Brent Oil Price')
+# plt.axvline(x=data.index[change_point_index], color='red', linestyle='--', label='Change Point')
+# plt.xlabel('Date')
+# plt.ylabel('Price (USD)')
+# plt.title('Brent Oil Prices with Change Point')
+# plt.legend()
+# plt.show()
+
+
+# price_array = data['Price'].values
+# model = "rbf"
+# algo = rpt.Pelt(model=model).fit(price_array)
+# change_points = algo.predict(pen=20)
+
+# plt.figure(figsize=(14, 7))
+# plt.plot(data.index, data['Price'], label='Brent Oil Price')
+# for cp in change_points[:-1]:
+#     plt.axvline(x=data.index[cp], color='red', linestyle='--', label='Change Point' if cp == change_points[0] else "")
+# plt.xlabel('Date')
+# plt.ylabel('Price (USD)')
+# plt.title('Brent Oil Prices with Detected Change Points')
+# plt.legend()
+# plt.show()
