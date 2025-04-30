@@ -4,16 +4,9 @@
 
 ## **Introduction**
 
-Brent crude oil is a key benchmark for global oil pricing, influencing economies, financial markets, and energy policies worldwide. However, its price is highly volatile, often reacting sharply to political, economic, and geopolitical events. Understanding these price fluctuations is crucial for investors, policymakers, and energy companies to make informed decisions.
+Understanding the volatility of Brent crude oil prices is essential for investors, policymakers, and energy companies to make informed decisions. Market fluctuations are often influenced by geopolitical events, economic policies, and supply-demand imbalances. To provide a data-driven approach for predicting oil price volatility, a robust time series modeling pipeline was developed, leveraging advanced statistical and deep learning techniques.  
 
-This analysis focuses on examining how major global events, such as **political decisions, regional conflicts, economic sanctions, and OPEC policy changes**, affect Brent oil prices. The goal is to provide data-driven insights that help stakeholders navigate the complexities of the energy market.
-
-This report outlines the initial phase of the project: **defining a structured data analysis workflow** and **understanding the data and models** that will be used to analyze oil price movements.
-
-
-Understanding the volatility of Brent crude oil prices is essential for investors, policymakers, and energy companies. Market fluctuations are often influenced by geopolitical events, economic policies, and supply-demand imbalances. To provide a data-driven approach for predicting oil price volatility, a robust time series modeling pipeline was developed, leveraging advanced statistical and deep learning techniques.  
-
-This article walks through the key steps involved, from data exploration to deploying a predictive dashboard.  
+Brent crude oil is a key benchmark for global oil pricing, influencing economies, financial markets, and energy policies worldwide. However, its price is highly volatile, often reacting sharply to political, economic, and geopolitical events. This analysis focuses on examining how major global events, such as **political decisions, regional conflicts, economic sanctions, and OPEC policy changes**, affect Brent oil prices. The goal is to provide data-driven insights that help stakeholders navigate the complexities of the energy market. This article walks through the key steps involved, from data exploration to deploying a predictive dashboard.  
 
 ---
 
